@@ -15,8 +15,8 @@
 <body>
     <div class="container">
         <header>
-            <h1>🎨 Dibujo Sonoro 🎵</h1>
-            <p>Dibuja para crear música - cada forma produce un sonido único</p>
+            <h1>⭐ Conecta las Constelaciones 🎵</h1>
+            <p>Une las estrellas en orden para formar constelaciones y crear melodías celestiales</p>
         </header>
         
         <main>
@@ -27,30 +27,32 @@
             </div>
             
             <aside class="controls-panel">
-                <section class="drawing-controls">
-                    <h3>🎨 Controles de Dibujo</h3>
+                <section class="game-controls">
+                    <h3>� Seleccionar Constelación</h3>
                     
                     <div class="control-group">
-                        <label for="brush-color">Color:</label>
-                        <input type="color" id="brush-color" value="#ff6b6b">
-                    </div>
-                    
-                    <div class="control-group">
-                        <label for="brush-size">Tamaño:</label>
-                        <input type="range" id="brush-size" min="5" max="50" value="20">
-                        <span id="brush-size-value">20</span>
-                    </div>
-                    
-                    <div class="control-group">
-                        <label for="shape-type">Forma:</label>
-                        <select id="shape-type">
-                            <option value="circle">Círculo</option>
-                            <option value="square">Cuadrado</option>
-                            <option value="triangle">Triángulo</option>
+                        <label for="constellation-select">Constelación:</label>
+                        <select id="constellation-select">
+                            <option value="leo">Leo (El León)</option>
+                            <option value="acuario">Acuario (El Aguador)</option>
+                            <option value="orion">Orión (El Cazador)</option>
+                            <option value="osamayor">Osa Mayor (El Gran Carro)</option>
+                            <option value="casiopea">Casiopea (La Reina)</option>
+                            <option value="cruz">Cruz del Sur</option>
                         </select>
                     </div>
                     
-                    <button id="clear-canvas" class="btn btn-secondary">Limpiar Canvas</button>
+                    <div class="control-group">
+                        <label>
+                            <input type="checkbox" id="show-hints" checked>
+                            Mostrar pistas visuales
+                        </label>
+                    </div>
+                    
+                    <div class="control-buttons">
+                        <button id="new-game" class="btn btn-primary">🎮 Nueva Partida</button>
+                        <button id="reset-current" class="btn btn-secondary">🔄 Reiniciar Actual</button>
+                    </div>
                 </section>
                 
                 <section class="audio-controls">
@@ -72,38 +74,36 @@
                         </select>
                     </div>
                     
-                    <div class="control-group">
-                        <label for="scale-type">Escala Musical:</label>
-                        <select id="scale-type">
-                            <option value="pentatonic">Pentatónica</option>
-                            <option value="major">Mayor</option>
-                            <option value="minor">Menor</option>
-                            <option value="chromatic">Cromática</option>
-                        </select>
-                    </div>
-                    
                     <div class="control-buttons">
-                        <button id="play-drawing" class="btn btn-primary">▶️ Reproducir Dibujo</button>
+                        <button id="play-melody" class="btn btn-primary">🎼 Reproducir Melodía</button>
                         <button id="stop-audio" class="btn btn-secondary">⏹️ Detener Audio</button>
                     </div>
                 </section>
                 
                 <section class="info-panel">
-                    <h3>ℹ️ Información</h3>
-                    <div id="drawing-info">
-                        <p><strong>Formas dibujadas:</strong> <span id="shapes-count">0</span></p>
-                        <p><strong>Estado audio:</strong> <span id="audio-status">Detenido</span></p>
+                    <h3>ℹ️ Información del Juego</h3>
+                    <div id="game-info">
+                        <p><strong>Constelación:</strong> <span id="current-constellation">Leo (El León)</span></p>
+                        <p><strong>Progreso:</strong> <span id="progress">0/7</span> estrellas conectadas</p>
+                        <p><strong>Siguiente estrella:</strong> <span id="next-star">Regulus</span></p>
+                        <p><strong>Estado:</strong> <span id="game-status">Haz clic en una estrella para empezar</span></p>
+                        <p><strong>Audio:</strong> <span id="audio-status">Se activará al jugar</span></p>
                     </div>
                     
                     <div class="instructions">
-                        <h4>📝 Instrucciones:</h4>
+                        <h4>📝 Cómo Jugar:</h4>
                         <ul>
-                            <li>Haz clic y arrastra para dibujar</li>
-                            <li>Cada forma genera un sonido diferente</li>
-                            <li>La posición Y determina el tono</li>
-                            <li>El color afecta el timbre</li>
-                            <li>El tamaño controla la duración</li>
+                            <li>Haz clic en las estrellas en orden</li>
+                            <li>Conecta todas las estrellas de la constelación</li>
+                            <li>Cada conexión reproduce una nota</li>
+                            <li>Completa la constelación para escuchar la melodía</li>
+                            <li>Las estrellas brillan cuando puedes conectarlas</li>
                         </ul>
+                    </div>
+                    
+                    <div class="achievements" id="achievements">
+                        <h4>🏆 Logros:</h4>
+                        <div id="completed-constellations"></div>
                     </div>
                 </section>
             </aside>

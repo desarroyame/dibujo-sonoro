@@ -326,14 +326,75 @@ footer {
     animation: pulse 0.3s ease;
 }
 
-/* Estados especiales */
+/* Estados especiales del juego */
 .audio-playing {
     border: 2px solid var(--accent-color) !important;
     box-shadow: 0 0 20px rgba(255, 107, 107, 0.3) !important;
 }
 
-.drawing-active {
-    border: 2px solid var(--primary-color) !important;
+.constellation-completed {
+    border: 2px solid #ffd700 !important;
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.4) !important;
+}
+
+/* Logros */
+.achievement-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--border-color);
+    border-radius: 6px;
+    margin-bottom: 6px;
+    font-size: 0.8rem;
+}
+
+.achievement-icon {
+    font-size: 1rem;
+}
+
+.achievement-name {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+/* Checkbox personalizado */
+input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--primary-color);
+}
+
+/* Mejoras responsivas para el juego */
+@media (max-width: 768px) {
+    #canvas-wrapper {
+        min-height: 350px;
+    }
+    
+    .achievement-item {
+        font-size: 0.7rem;
+    }
+}
+
+/* Animación de las estrellas */
+@keyframes twinkle {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.star-twinkle {
+    animation: twinkle 2s ease-in-out infinite;
+}
+
+/* Efecto de conexión exitosa */
+@keyframes connection-success {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); border-color: #44ff44; }
+    100% { transform: scale(1); }
+}
+
+.connection-success {
+    animation: connection-success 0.5s ease-in-out;
 }
 
 /* Scrollbar personalizado */

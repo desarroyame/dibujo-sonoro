@@ -1,21 +1,118 @@
-// Variables globales
-let shapes = []; // Array para almacenar las formas dibujadas
-let isDrawing = false;
-let currentShape = null;
+// Variables globales del juego
+let stars = []; // Estrellas de la constelación actual
+let connections = []; // Líneas dibujadas por el usuario
+let correctConnections = []; // Conexiones correctas completadas
+let currentStarIndex = 0; // Siguiente estrella a conectar
+let gameComplete = false;
+let currentConstellation = 'leo';
+let showHints = true;
 
 // Variables de configuración
-let brushColor = '#ff6b6b';
-let brushSize = 20;
-let shapeType = 'circle';
 let synthType = 'sine';
 let scaleType = 'pentatonic';
 let masterVolume = 0.5;
 
 // Audio variables
 let synth;
-let audioContext;
+let melodyNotes = [];
+let currentNoteIndex = 0;
 let isPlaying = false;
-let playbackInterval;
+
+// Datos de las constelaciones
+const constellations = {
+    leo: {
+        name: "Leo (El León)",
+        stars: [
+            { x: 200, y: 150, name: "Regulus", brightness: 1.4 },
+            { x: 280, y: 180, name: "Algieba", brightness: 2.1 },
+            { x: 350, y: 160, name: "Adhafera", brightness: 3.4 },
+            { x: 380, y: 200, name: "Ras Elased", brightness: 3.8 },
+            { x: 320, y: 250, name: "Chertan", brightness: 3.3 },
+            { x: 250, y: 280, name: "Denebola", brightness: 2.1 },
+            { x: 180, y: 240, name: "Zosma", brightness: 2.6 }
+        ],
+        connections: [
+            [0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 0]
+        ],
+        melody: ['C4', 'E4', 'G4', 'C5', 'G4', 'E4', 'C4']
+    },
+    acuario: {
+        name: "Acuario (El Aguador)",
+        stars: [
+            { x: 150, y: 120, name: "Sadalsuud", brightness: 2.9 },
+            { x: 220, y: 140, name: "Sadalmelik", brightness: 3.0 },
+            { x: 280, y: 160, name: "Sadachbia", brightness: 3.8 },
+            { x: 340, y: 200, name: "Skat", brightness: 3.3 },
+            { x: 300, y: 260, name: "Albali", brightness: 3.7 },
+            { x: 240, y: 280, name: "Ancha", brightness: 4.2 },
+            { x: 180, y: 250, name: "Situla", brightness: 4.8 }
+        ],
+        connections: [
+            [0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [1, 5]
+        ],
+        melody: ['A3', 'C4', 'E4', 'A4', 'F4', 'D4', 'A3']
+    },
+    orion: {
+        name: "Orión (El Cazador)",
+        stars: [
+            { x: 250, y: 100, name: "Betelgeuse", brightness: 0.5 },
+            { x: 350, y: 120, name: "Bellatrix", brightness: 1.6 },
+            { x: 200, y: 200, name: "Alnitak", brightness: 1.8 },
+            { x: 250, y: 210, name: "Alnilam", brightness: 1.7 },
+            { x: 300, y: 220, name: "Mintaka", brightness: 2.2 },
+            { x: 380, y: 280, name: "Rigel", brightness: 0.1 },
+            { x: 180, y: 320, name: "Saiph", brightness: 2.1 }
+        ],
+        connections: [
+            [0, 1], [2, 3], [3, 4], [4, 5], [5, 6], [6, 2], [0, 2], [1, 4]
+        ],
+        melody: ['G3', 'D4', 'G4', 'B4', 'D5', 'G4', 'D4', 'G3']
+    },
+    osamayor: {
+        name: "Osa Mayor (El Gran Carro)",
+        stars: [
+            { x: 150, y: 180, name: "Dubhe", brightness: 1.8 },
+            { x: 220, y: 160, name: "Merak", brightness: 2.4 },
+            { x: 290, y: 170, name: "Phecda", brightness: 2.4 },
+            { x: 360, y: 180, name: "Megrez", brightness: 3.3 },
+            { x: 420, y: 160, name: "Alioth", brightness: 1.8 },
+            { x: 480, y: 170, name: "Mizar", brightness: 2.1 },
+            { x: 540, y: 190, name: "Alkaid", brightness: 1.9 }
+        ],
+        connections: [
+            [0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [3, 0]
+        ],
+        melody: ['F3', 'A3', 'C4', 'F4', 'A4', 'C5', 'F5']
+    },
+    casiopea: {
+        name: "Casiopea (La Reina)",
+        stars: [
+            { x: 180, y: 150, name: "Caph", brightness: 2.3 },
+            { x: 250, y: 200, name: "Schedar", brightness: 2.2 },
+            { x: 320, y: 160, name: "Gamma Cas", brightness: 2.5 },
+            { x: 390, y: 220, name: "Ruchbah", brightness: 2.7 },
+            { x: 460, y: 180, name: "Segin", brightness: 3.4 }
+        ],
+        connections: [
+            [0, 1], [1, 2], [2, 3], [3, 4]
+        ],
+        melody: ['E4', 'G4', 'B4', 'E5', 'B4']
+    },
+    cruz: {
+        name: "Cruz del Sur",
+        stars: [
+            { x: 280, y: 120, name: "Acrux", brightness: 0.8 },
+            { x: 320, y: 180, name: "Gacrux", brightness: 1.6 },
+            { x: 280, y: 240, name: "Imai", brightness: 2.8 },
+            { x: 240, y: 180, name: "Mimosa", brightness: 1.3 },
+            { x: 350, y: 150, name: "Intrometida", brightness: 4.0 }
+        ],
+        connections: [
+            [0, 2], [1, 3], [0, 1], [1, 2], [2, 3], [3, 0]
+        ],
+        melody: ['D4', 'F#4', 'A4', 'D5', 'A4']
+    }
+};
 
 // Escalas musicales
 const scales = {
@@ -34,127 +131,298 @@ function setup() {
     canvas.parent('canvas-wrapper');
     
     // Configurar el canvas
-    background(0);
+    background(0, 5, 20); // Azul oscuro nocturno
     colorMode(HSB, 360, 100, 100, 100);
     
-    // Inicializar audio
-    initializeAudio();
+    // NO inicializar audio automáticamente para evitar advertencias
+    // initializeAudio();
     
     // Configurar event listeners
     setupEventListeners();
     
-    console.log('Aplicación de Dibujo Sonoro inicializada');
+    // Cargar constelación inicial
+    loadConstellation(currentConstellation);
+    
+    console.log('Juego de Constelaciones inicializado');
 }
 
 function draw() {
-    // Dibujar todas las formas almacenadas
-    background(0, 0, 5, 10); // Fondo semi-transparente para efecto de estela
+    // Cielo nocturno con estrellas de fondo
+    drawNightSky();
     
-    for (let shape of shapes) {
-        drawShape(shape);
-    }
+    // Dibujar las conexiones completadas
+    drawCompletedConnections();
+    
+    // Dibujar las estrellas de la constelación
+    drawConstellationStars();
     
     // Mostrar información en tiempo real
     updateUI();
 }
 
-// Funciones de dibujo con p5.js
-function mousePressed() {
-    if (mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height) {
-        isDrawing = true;
-        
-        // Crear nueva forma
-        currentShape = {
-            x: mouseX,
-            y: mouseY,
-            size: brushSize,
-            color: brushColor,
-            type: shapeType,
-            timestamp: millis(),
-            id: Date.now() + Math.random()
-        };
-        
-        // Agregar la forma al array
-        shapes.push(currentShape);
-        
-        // Reproducir sonido inmediatamente
-        playShapeSound(currentShape);
-        
-        // Agregar efecto visual al canvas
-        document.getElementById('canvas-wrapper').classList.add('drawing-active');
+// Variables para estrellas de fondo
+let backgroundStars = [];
+
+function drawNightSky() {
+    // Gradiente de cielo nocturno
+    background(240, 80, 10); // Azul muy oscuro
+    
+    // Generar estrellas de fondo una sola vez
+    if (backgroundStars.length === 0) {
+        for (let i = 0; i < 100; i++) {
+            backgroundStars.push({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                size: Math.random() * 2 + 1,
+                brightness: Math.random() * 60 + 40
+            });
+        }
+    }
+    
+    // Dibujar estrellas de fondo
+    fill(50, 20, 90, 30);
+    noStroke();
+    for (let star of backgroundStars) {
+        ellipse(star.x, star.y, star.size);
     }
 }
 
-function mouseDragged() {
-    if (isDrawing && mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height) {
-        // Crear formas continuas durante el arrastre
-        currentShape = {
-            x: mouseX,
-            y: mouseY,
-            size: brushSize,
-            color: brushColor,
-            type: shapeType,
-            timestamp: millis(),
-            id: Date.now() + Math.random()
-        };
+function drawConstellationStars() {
+    for (let i = 0; i < stars.length; i++) {
+        let star = stars[i];
+        let isNext = (i === currentStarIndex);
+        let isClickable = (i === currentStarIndex || (currentStarIndex > 0 && i === currentStarIndex - 1));
         
-        shapes.push(currentShape);
+        // Determinar el color y brillo de la estrella
+        let hue = 50; // Amarillo dorado
+        let saturation = 60;
+        let brightness = map(star.brightness, 0, 5, 100, 40); // Estrellas más brillantes = más luminosas
         
-        // Reproducir sonido con menor frecuencia durante el arrastre
-        if (frameCount % 5 === 0) {
-            playShapeSound(currentShape);
+        if (isNext && showHints) {
+            // Estrella siguiente: pulsar en amarillo brillante
+            brightness = 90 + 10 * sin(frameCount * 0.1);
+            saturation = 80;
+        } else if (!isClickable) {
+            // Estrellas no disponibles: más tenues
+            brightness *= 0.5;
+            saturation = 20;
+        }
+        
+        // Dibujar el resplandor de la estrella
+        push();
+        drawingContext.shadowColor = color(hue, saturation, brightness);
+        drawingContext.shadowBlur = 20;
+        
+        fill(hue, saturation, brightness);
+        noStroke();
+        
+        // Tamaño basado en brillo real de la estrella
+        let size = map(star.brightness, 0, 5, 12, 6);
+        ellipse(star.x, star.y, size);
+        
+        // Puntos de luz adicionales para efecto de centelleo
+        if (frameCount % 30 < 15) {
+            fill(hue, 40, 100, 60);
+            ellipse(star.x, star.y, size * 1.5);
+        }
+        
+        pop();
+        
+        // Mostrar nombre de la estrella si está cerca del mouse
+        let distance = dist(mouseX, mouseY, star.x, star.y);
+        if (distance < 30) {
+            fill(0, 0, 100);
+            textAlign(CENTER);
+            textSize(12);
+            text(star.name, star.x, star.y - 20);
+        }
+        
+        // Mostrar número de orden si las pistas están activadas
+        if (showHints && isNext) {
+            fill(120, 100, 100); // Verde brillante
+            textAlign(CENTER);
+            textSize(14);
+            text(i + 1, star.x, star.y + 25);
         }
     }
 }
 
-function mouseReleased() {
-    isDrawing = false;
-    currentShape = null;
-    document.getElementById('canvas-wrapper').classList.remove('drawing-active');
+function drawCompletedConnections() {
+    stroke(120, 60, 80, 80); // Verde suave
+    strokeWeight(3);
+    
+    for (let connection of correctConnections) {
+        let star1 = stars[connection.from];
+        let star2 = stars[connection.to];
+        
+        // Efecto de línea animada
+        drawingContext.shadowColor = color(120, 60, 100);
+        drawingContext.shadowBlur = 10;
+        
+        line(star1.x, star1.y, star2.x, star2.y);
+        
+        // Partículas en movimiento a lo largo de la línea
+        let t = (frameCount * 0.02) % 1;
+        let x = lerp(star1.x, star2.x, t);
+        let y = lerp(star1.y, star2.y, t);
+        
+        fill(120, 80, 100, 60);
+        noStroke();
+        ellipse(x, y, 6);
+    }
 }
 
-function drawShape(shape) {
-    push();
+// Funciones de interacción del juego
+function mousePressed() {
+    if (gameComplete) return;
     
-    // Convertir color hex a HSB
-    let c = color(shape.color);
-    let h = hue(c);
-    let s = saturation(c);
-    let b = brightness(c);
-    
-    fill(h, s, b, 80);
-    stroke(h, s, b + 20);
-    strokeWeight(2);
-    
-    // Dibujar según el tipo de forma
-    switch (shape.type) {
-        case 'circle':
-            ellipse(shape.x, shape.y, shape.size);
+    // Buscar si se hizo clic en una estrella
+    for (let i = 0; i < stars.length; i++) {
+        let star = stars[i];
+        let distance = dist(mouseX, mouseY, star.x, star.y);
+        
+        if (distance < 30) { // Radio de detección
+            handleStarClick(i);
             break;
-        case 'square':
-            rectMode(CENTER);
-            rect(shape.x, shape.y, shape.size, shape.size);
-            break;
-        case 'triangle':
-            let halfSize = shape.size / 2;
-            triangle(
-                shape.x, shape.y - halfSize,
-                shape.x - halfSize, shape.y + halfSize,
-                shape.x + halfSize, shape.y + halfSize
-            );
-            break;
+        }
+    }
+}
+
+async function handleStarClick(starIndex) {
+    // Solo permitir clic en la siguiente estrella en secuencia
+    if (starIndex !== currentStarIndex) {
+        // Efecto de error
+        showError("¡Conecta las estrellas en orden!");
+        return;
     }
     
+    // Inicializar audio en la primera interacción
+    if (!audioInitialized) {
+        await startAudioContext();
+    }
+    
+    // Si hay una estrella anterior, crear la conexión
+    if (currentStarIndex > 0) {
+        let connection = {
+            from: currentStarIndex - 1,
+            to: currentStarIndex
+        };
+        correctConnections.push(connection);
+        
+        // Reproducir nota correspondiente
+        playConnectionSound(currentStarIndex - 1);
+        
+        // Efecto visual de conexión exitosa
+        showSuccess();
+    } else {
+        // Primera estrella, solo reproducir su sonido
+        playConnectionSound(0);
+    }
+    
+    // Avanzar a la siguiente estrella
+    currentStarIndex++;
+    
+    // Verificar si se completó la constelación
+    if (currentStarIndex >= stars.length) {
+        completeConstellation();
+    }
+    
+    updateGameInfo();
+}
+
+function loadConstellation(constellationKey) {
+    let constellation = constellations[constellationKey];
+    if (!constellation) return;
+    
+    stars = constellation.stars.map(star => ({...star}));
+    correctConnections = [];
+    currentStarIndex = 0;
+    gameComplete = false;
+    melodyNotes = [...constellation.melody];
+    currentNoteIndex = 0;
+    
+    // Actualizar UI
+    document.getElementById('current-constellation').textContent = constellation.name;
+    document.getElementById('next-star').textContent = stars[0].name;
+    document.getElementById('game-status').textContent = 'Listo para jugar';
+    
+    updateGameInfo();
+}
+
+function completeConstellation() {
+    gameComplete = true;
+    document.getElementById('game-status').textContent = '¡Constelación completada!';
+    
+    // Reproducir melodía completa
+    setTimeout(() => {
+        playCompleteMelody();
+    }, 500);
+    
+    // Agregar a logros
+    addAchievement(currentConstellation);
+    
+    // Efectos visuales de celebración
+    celebrateCompletion();
+}
+
+function showError(message) {
+    // Efecto visual de error
+    document.getElementById('canvas-wrapper').style.border = '3px solid #ff4444';
+    setTimeout(() => {
+        document.getElementById('canvas-wrapper').style.border = '';
+    }, 500);
+    
+    // Mostrar mensaje temporal
+    document.getElementById('game-status').textContent = message;
+    setTimeout(() => {
+        document.getElementById('game-status').textContent = 'Continúa conectando...';
+    }, 2000);
+}
+
+function showSuccess() {
+    // Efecto visual de éxito
+    document.getElementById('canvas-wrapper').style.border = '3px solid #44ff44';
+    setTimeout(() => {
+        document.getElementById('canvas-wrapper').style.border = '';
+    }, 300);
+}
+
+function celebrateCompletion() {
+    // Efecto de partículas de celebración
+    for (let i = 0; i < 50; i++) {
+        setTimeout(() => {
+            let x = random(width);
+            let y = random(height);
+            drawCelebrationParticle(x, y);
+        }, i * 50);
+    }
+}
+
+function drawCelebrationParticle(x, y) {
+    push();
+    fill(random(0, 360), 80, 100, 80);
+    noStroke();
+    ellipse(x, y, random(5, 15));
     pop();
 }
 
+// Variables de estado del audio
+let audioInitialized = false;
+
 // Funciones de audio con Tone.js
 async function initializeAudio() {
+    // Solo mostrar mensaje, no inicializar nada hasta interacción del usuario
+    updateAudioStatus('Listo para iniciar');
+}
+
+async function startAudioContext() {
+    if (audioInitialized) return;
+    
     try {
-        // Inicializar Tone.js
+        // Inicializar Tone.js después de interacción del usuario
         await Tone.start();
         
-        // Crear sintetizador
+        // Crear sintetizador polifónico para las constelaciones
         synth = new Tone.PolySynth(Tone.Synth, {
             oscillator: {
                 type: synthType
@@ -162,172 +430,136 @@ async function initializeAudio() {
             envelope: {
                 attack: 0.1,
                 decay: 0.3,
-                sustain: 0.4,
-                release: 0.8
+                sustain: 0.7,
+                release: 1.2
             }
         }).toDestination();
         
         // Configurar volumen inicial
         Tone.getDestination().volume.value = Tone.gainToDb(masterVolume);
         
+        audioInitialized = true;
         console.log('Audio inicializado correctamente');
         
-        // Actualizar estado en UI
-        document.getElementById('audio-status').textContent = 'Listo';
+        // Actualizar UI para mostrar que el audio está listo
+        updateAudioStatus('Listo');
         
     } catch (error) {
         console.error('Error inicializando audio:', error);
-        document.getElementById('audio-status').textContent = 'Error';
+        updateAudioStatus('Error');
     }
 }
 
-function playShapeSound(shape) {
-    if (!synth) return;
+function updateAudioStatus(status) {
+    // Actualizar algún elemento de UI si existe
+    const statusElement = document.getElementById('audio-status');
+    if (statusElement) {
+        statusElement.textContent = status;
+    }
+}
+
+async function playConnectionSound(starIndex) {
+    // Asegurar que el audio esté inicializado
+    if (!audioInitialized) {
+        await startAudioContext();
+    }
+    
+    if (!synth || !melodyNotes[starIndex]) return;
     
     try {
-        // Mapear posición Y a nota musical (invertido para que arriba sea más agudo)
-        let noteIndex = Math.floor(map(height - shape.y, 0, height, 0, scales[scaleType].length - 1));
-        noteIndex = constrain(noteIndex, 0, scales[scaleType].length - 1);
-        let note = scales[scaleType][noteIndex];
+        let note = melodyNotes[starIndex];
+        let duration = '8n'; // Octava nota
         
-        // Mapear tamaño a duración (formas más grandes = sonidos más largos)
-        let duration = map(shape.size, 5, 50, 0.1, 1.0);
-        
-        // Mapear color a efectos sutiles en el timbre
-        let c = color(shape.color);
-        let hueValue = hue(c);
-        let detune = map(hueValue, 0, 360, -50, 50);
-        
-        // Configurar parámetros del sintetizador basados en la forma
-        let synthParams = {
-            oscillator: {
-                type: synthType,
-                detune: detune
+        // Configurar el sintetizador
+        synth.set({
+            oscillator: { type: synthType },
+            envelope: {
+                attack: 0.1,
+                decay: 0.3,
+                sustain: 0.7,
+                release: 1.2
             }
-        };
-        
-        // Diferentes configuraciones según el tipo de forma
-        switch (shape.type) {
-            case 'circle':
-                synthParams.envelope = { attack: 0.1, decay: 0.3, sustain: 0.4, release: 0.8 };
-                break;
-            case 'square':
-                synthParams.envelope = { attack: 0.01, decay: 0.1, sustain: 0.8, release: 0.4 };
-                break;
-            case 'triangle':
-                synthParams.envelope = { attack: 0.2, decay: 0.5, sustain: 0.2, release: 1.2 };
-                break;
-        }
-        
-        // Actualizar sintetizador
-        synth.set(synthParams);
+        });
         
         // Tocar la nota
         synth.triggerAttackRelease(note, duration);
         
+        console.log(`Nota tocada: ${note} (estrella ${starIndex})`);
+        
     } catch (error) {
-        console.error('Error reproduciendo sonido:', error);
+        console.error('Error reproduciendo sonido de conexión:', error);
     }
 }
 
-function playDrawing() {
-    if (shapes.length === 0) {
-        alert('¡Dibuja algo primero!');
-        return;
+async function playCompleteMelody() {
+    // Asegurar que el audio esté inicializado
+    if (!audioInitialized) {
+        await startAudioContext();
     }
     
-    if (isPlaying) {
-        stopAudio();
-        return;
-    }
+    if (!synth || !melodyNotes.length) return;
     
     isPlaying = true;
-    document.getElementById('audio-status').textContent = 'Reproduciendo';
-    document.getElementById('play-drawing').textContent = '⏸️ Pausar';
     document.getElementById('canvas-wrapper').classList.add('audio-playing');
     
-    // Ordenar formas por tiempo de creación
-    let sortedShapes = [...shapes].sort((a, b) => a.timestamp - b.timestamp);
-    let startTime = sortedShapes[0].timestamp;
-    
-    // Reproducir cada forma en secuencia temporal
-    sortedShapes.forEach((shape, index) => {
-        let delay = (shape.timestamp - startTime) / 1000; // Convertir a segundos
-        
+    // Reproducir toda la melodía en secuencia
+    melodyNotes.forEach((note, index) => {
         setTimeout(() => {
             if (isPlaying) {
-                playShapeSound(shape);
+                synth.triggerAttackRelease(note, '4n'); // Negras para la melodía completa
                 
-                // Efecto visual de resaltado
-                highlightShape(shape);
+                // Resaltar la estrella correspondiente
+                if (index < stars.length) {
+                    highlightStar(index);
+                }
             }
-        }, delay * 1000); // Convertir de vuelta a milisegundos
+        }, index * 600); // 600ms entre notas
     });
     
-    // Detener automáticamente al final
-    let totalDuration = (sortedShapes[sortedShapes.length - 1].timestamp - startTime) + 2000;
+    // Detener al final
     setTimeout(() => {
-        if (isPlaying) {
-            stopAudio();
-        }
-    }, totalDuration);
+        stopAudio();
+    }, melodyNotes.length * 600 + 1000);
 }
 
-function highlightShape(shape) {
-    // Agregar un efecto visual temporal para mostrar qué forma está sonando
-    push();
-    stroke(60, 100, 100); // Amarillo brillante
-    strokeWeight(4);
-    noFill();
+function highlightStar(starIndex) {
+    if (!stars[starIndex]) return;
     
-    switch (shape.type) {
-        case 'circle':
-            ellipse(shape.x, shape.y, shape.size + 10);
-            break;
-        case 'square':
-            rectMode(CENTER);
-            rect(shape.x, shape.y, shape.size + 10, shape.size + 10);
-            break;
-        case 'triangle':
-            let halfSize = (shape.size + 10) / 2;
-            triangle(
-                shape.x, shape.y - halfSize,
-                shape.x - halfSize, shape.y + halfSize,
-                shape.x + halfSize, shape.y + halfSize
-            );
-            break;
-    }
-    pop();
+    let star = stars[starIndex];
+    
+    // Crear efecto de resplandor temporal
+    setTimeout(() => {
+        push();
+        drawingContext.shadowColor = color(60, 100, 100);
+        drawingContext.shadowBlur = 30;
+        fill(60, 100, 100, 80);
+        noStroke();
+        ellipse(star.x, star.y, 25);
+        pop();
+    }, 0);
 }
 
 function stopAudio() {
     isPlaying = false;
-    document.getElementById('audio-status').textContent = 'Detenido';
-    document.getElementById('play-drawing').textContent = '▶️ Reproducir Dibujo';
     document.getElementById('canvas-wrapper').classList.remove('audio-playing');
     
     // Detener todos los sonidos
-    if (synth) {
+    if (synth && synth.releaseAll) {
         synth.releaseAll();
     }
 }
 
 // Event listeners para controles
 function setupEventListeners() {
-    // Control de color
-    document.getElementById('brush-color').addEventListener('change', (e) => {
-        brushColor = e.target.value;
+    // Selector de constelación
+    document.getElementById('constellation-select').addEventListener('change', (e) => {
+        currentConstellation = e.target.value;
+        loadConstellation(currentConstellation);
     });
     
-    // Control de tamaño
-    document.getElementById('brush-size').addEventListener('input', (e) => {
-        brushSize = parseInt(e.target.value);
-        document.getElementById('brush-size-value').textContent = brushSize;
-    });
-    
-    // Control de forma
-    document.getElementById('shape-type').addEventListener('change', (e) => {
-        shapeType = e.target.value;
+    // Control de pistas visuales
+    document.getElementById('show-hints').addEventListener('change', (e) => {
+        showHints = e.target.checked;
     });
     
     // Control de volumen
@@ -350,30 +582,75 @@ function setupEventListeners() {
         }
     });
     
-    // Control de escala musical
-    document.getElementById('scale-type').addEventListener('change', (e) => {
-        scaleType = e.target.value;
+    // Botones de control del juego
+    document.getElementById('new-game').addEventListener('click', () => {
+        loadConstellation(currentConstellation);
     });
     
-    // Botones de control
-    document.getElementById('clear-canvas').addEventListener('click', () => {
-        shapes = [];
-        background(0);
-        updateUI();
+    document.getElementById('reset-current').addEventListener('click', () => {
+        resetCurrentGame();
     });
     
-    document.getElementById('play-drawing').addEventListener('click', playDrawing);
+    document.getElementById('play-melody').addEventListener('click', () => {
+        if (gameComplete) {
+            playCompleteMelody();
+        } else {
+            alert('¡Completa la constelación primero para escuchar la melodía!');
+        }
+    });
+    
     document.getElementById('stop-audio').addEventListener('click', stopAudio);
+}
+
+function resetCurrentGame() {
+    correctConnections = [];
+    currentStarIndex = 0;
+    gameComplete = false;
+    currentNoteIndex = 0;
     
-    // Manejo de resize de ventana
-    window.addEventListener('resize', () => {
-        // p5.js maneja automáticamente el resize
-    });
+    document.getElementById('game-status').textContent = 'Juego reiniciado';
+    updateGameInfo();
+}
+
+function updateGameInfo() {
+    let constellation = constellations[currentConstellation];
+    if (!constellation) return;
+    
+    // Actualizar progreso
+    let progress = `${currentStarIndex}/${stars.length}`;
+    document.getElementById('progress').textContent = progress;
+    
+    // Actualizar siguiente estrella
+    if (currentStarIndex < stars.length) {
+        document.getElementById('next-star').textContent = stars[currentStarIndex].name;
+    } else {
+        document.getElementById('next-star').textContent = '¡Completado!';
+    }
+}
+
+function addAchievement(constellationKey) {
+    let constellation = constellations[constellationKey];
+    let achievementsDiv = document.getElementById('completed-constellations');
+    
+    // Verificar si ya existe
+    if (achievementsDiv.querySelector(`[data-constellation="${constellationKey}"]`)) {
+        return;
+    }
+    
+    // Crear nuevo logro
+    let achievement = document.createElement('div');
+    achievement.className = 'achievement-item';
+    achievement.setAttribute('data-constellation', constellationKey);
+    achievement.innerHTML = `
+        <span class="achievement-icon">⭐</span>
+        <span class="achievement-name">${constellation.name}</span>
+    `;
+    
+    achievementsDiv.appendChild(achievement);
 }
 
 function updateUI() {
-    // Actualizar contador de formas
-    document.getElementById('shapes-count').textContent = shapes.length;
+    updateGameInfo();
 }
 
 // Funciones auxiliares
@@ -383,6 +660,17 @@ function map(value, start1, stop1, start2, stop2) {
 
 function constrain(value, min, max) {
     return Math.min(Math.max(value, min), max);
+}
+
+// Funciones auxiliares adicionales (por si p5.js no está disponible)
+function lerp(start, stop, amt) {
+    return start + (stop - start) * amt;
+}
+
+function randomSeed(seed) {
+    // Implementación simple de random con seed
+    let x = Math.sin(seed) * 10000;
+    return x - Math.floor(x);
 }
 
 // Inicialización cuando se carga la página
