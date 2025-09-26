@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dibujo Sonoro - Arte Visual y Musical</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Tone.js CDN -->
+    <script src="https://unpkg.com/tone@14.8.49/build/Tone.js"></script>
+    
+    <!-- p5.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎨 Dibujo Sonoro 🎵</h1>
+            <p>Dibuja para crear música - cada forma produce un sonido único</p>
+        </header>
+        
+        <main>
+            <div class="canvas-container">
+                <div id="canvas-wrapper">
+                    <!-- El canvas de p5.js se insertará aquí automáticamente -->
+                </div>
+            </div>
+            
+            <aside class="controls-panel">
+                <section class="drawing-controls">
+                    <h3>🎨 Controles de Dibujo</h3>
+                    
+                    <div class="control-group">
+                        <label for="brush-color">Color:</label>
+                        <input type="color" id="brush-color" value="#ff6b6b">
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="brush-size">Tamaño:</label>
+                        <input type="range" id="brush-size" min="5" max="50" value="20">
+                        <span id="brush-size-value">20</span>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="shape-type">Forma:</label>
+                        <select id="shape-type">
+                            <option value="circle">Círculo</option>
+                            <option value="square">Cuadrado</option>
+                            <option value="triangle">Triángulo</option>
+                        </select>
+                    </div>
+                    
+                    <button id="clear-canvas" class="btn btn-secondary">Limpiar Canvas</button>
+                </section>
+                
+                <section class="audio-controls">
+                    <h3>🎵 Controles de Audio</h3>
+                    
+                    <div class="control-group">
+                        <label for="master-volume">Volumen:</label>
+                        <input type="range" id="master-volume" min="0" max="100" value="50">
+                        <span id="volume-value">50%</span>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="synth-type">Sintetizador:</label>
+                        <select id="synth-type">
+                            <option value="sine">Sinusoidal</option>
+                            <option value="square">Cuadrada</option>
+                            <option value="sawtooth">Diente de Sierra</option>
+                            <option value="triangle">Triangular</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="scale-type">Escala Musical:</label>
+                        <select id="scale-type">
+                            <option value="pentatonic">Pentatónica</option>
+                            <option value="major">Mayor</option>
+                            <option value="minor">Menor</option>
+                            <option value="chromatic">Cromática</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-buttons">
+                        <button id="play-drawing" class="btn btn-primary">▶️ Reproducir Dibujo</button>
+                        <button id="stop-audio" class="btn btn-secondary">⏹️ Detener Audio</button>
+                    </div>
+                </section>
+                
+                <section class="info-panel">
+                    <h3>ℹ️ Información</h3>
+                    <div id="drawing-info">
+                        <p><strong>Formas dibujadas:</strong> <span id="shapes-count">0</span></p>
+                        <p><strong>Estado audio:</strong> <span id="audio-status">Detenido</span></p>
+                    </div>
+                    
+                    <div class="instructions">
+                        <h4>📝 Instrucciones:</h4>
+                        <ul>
+                            <li>Haz clic y arrastra para dibujar</li>
+                            <li>Cada forma genera un sonido diferente</li>
+                            <li>La posición Y determina el tono</li>
+                            <li>El color afecta el timbre</li>
+                            <li>El tamaño controla la duración</li>
+                        </ul>
+                    </div>
+                </section>
+            </aside>
+        </main>
+        
+        <footer>
+            <p>Creado con ❤️ usando Tone.js y p5.js</p>
+        </footer>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
